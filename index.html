@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NebulaChat AI - Ultra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#c39df4', secondary: '#86d6cb', glass: 'rgba(255, 255, 255, 0.1)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* Image Preview Container */
+        .preview-wrapper {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 10px 24px;
+        }
+
+        .preview-container {
+            position: relative;
+            width: 64px;
+            height: 64px;
+        }
+
+        .preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #c39df4;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4d4d;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #0f111a;
+        }
+
+        .remove-btn:hover {
+            transform: scale(1.2);
+        }
+
+        html.dark #sunIcon {
+            display: block;
+            animation: rotate-in 0.5s ease;
+        }
+
+        html.dark #moonIcon {
+            display: none;
+        }
+
+        html:not(.dark) #sunIcon {
+            display: none;
+        }
+
+        html:not(.dark) #moonIcon {
+            display: block;
+            animation: slide-up 0.5s ease;
+        }
+
+        @keyframes rotate-in {
+            from {
+                transform: rotate(-90deg) scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: rotate(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slide-up {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bg-primary {
+            background-color: #B993FF;
+        }
+
+        .dark-glass {
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Light mode adjustments */
+        html:not(.dark) body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        html:not(.dark) .glass-effect {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        html:not(.dark) .dark-glass {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #1f2937;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c39df4;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0f111a] text-white h-screen overflow-hidden flex flex-col transition-colors duration-300">
+
+    <div class="flex h-full w-full">
+
+        <aside id="sidebar"
+            class="w-80 glass-effect border-r border-white/10 p-5 flex flex-col transition-all duration-300">
+            <h1
+                class="text-2xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-6">
+                NebulaChat</h1>
+
+            <button onclick="newChat()"
+                class="mb-6 w-full bg-primary/20 hover:bg-primary/30 border border-primary/40 text-black dark:text-white p-3 rounded-2xl transition flex items-center justify-center gap-2">
+                <span class="text-xl">+</span> New Chat
+            </button>
+
+            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-3">Recent Chats</div>
+            <div id="chatHistory" class="flex-1 overflow-y-auto space-y-2 pr-2"></div>
+
+            <!-- AI Models Dropdown - Changed to open Downward -->
+            <div class="mt-4 mb-6 p-4 rounded-2xl dark-glass relative border border-white/10">
+                <label class="text-[10px] text-primary uppercase font-bold mb-2 block">AI Models</label>
+                <div onclick="toggleModelList()" class="flex items-center justify-between cursor-pointer group">
+                    <!-- Default name changed to Step-3.5 Flash -->
+                    <span id="activeModelName" class="text-sm font-medium">Step-3.5 Flash</span>
+                    <span class="text-xs group-hover:translate-y-1 transition">▼</span>
+                </div>
+
+                <div id="modelOptions"
+                    class="hidden absolute top-full left-0 w-full mt-2 dark-glass rounded-2xl overflow-hidden shadow-2xl z-50">
+                    <div onclick="selectModel('stepfun/step-3.5-flash:free', 'Step-3.5 Flash')"
+                        class="p-3 hover:bg-primary/20 cursor-pointer text-sm border-b border-white/5">Step-3.5 Flash
+                        (Free)</div>
+                    <div onclick="selectModel('openai/gpt-4o-mini', 'GPT-4o Mini')"
+                        class="p-3 hover:bg-primary/20 cursor-pointer text-sm">GPT-4o Mini</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col relative">
+
+            <header class="p-4 flex justify-between items-center glass-effect z-10">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-white/10 rounded-lg">☰</button>
+                <div class="flex gap-3">
+                    
+                    <button onclick="toggleTheme()"
+                        class="w-10 h-10 rounded-xl glass-effect flex items-center justify-center transition-all duration-300 hover:bg-primary/20 group overflow-hidden">
+                        <span id="sunIcon" class="hidden text-2xl text-white select-none">☼</span>
+
+                        <span id="moonIcon" class="text-2xl text-gray-800 select-none">☾</span>
+                    </button>
+
+
+                    <button onclick="openKeyModal()"
+                        class="px-4 py-2 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20">⚷ API
+                        Key</button>
+                </div>
+            </header>
+
+            <div id="chatBox" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Content will be injected here -->
+            </div>
+
+            <!-- Welcome Screen Template (Hidden) -->
+            <template id="welcomeTemplate">
+                <div id="welcomeScreen" class="h-full flex flex-col items-center justify-center text-center space-y-6">
+                    <div
+                        class="w-20 h-20 bg-primary/20 rounded-3xl flex items-center justify-center text-4xl animate-pulse shadow-2xl shadow-primary/40">
+                        🌌</div>
+                    <div>
+                        <h2 class="text-2xl font-bold">How can I help you today?</h2>
+                        <p class="text-gray-500 text-sm">Choose a prompt or type your own below.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-2xl px-4">
+                        <button onclick="quickPrompt('Summarize this article')"
+                            class="p-4 rounded-2xl glass-effect hover:bg-primary/10 text-xs text-left transition">📝
+                            Summarize article</button>
+                        <button onclick="quickPrompt('Write a professional email')"
+                            class="p-4 rounded-2xl glass-effect hover:bg-primary/10 text-xs text-left transition">📧
+                            Write email</button>
+                        <button onclick="quickPrompt('Explain quantum physics')"
+                            class="p-4 rounded-2xl glass-effect hover:bg-primary/10 text-xs text-left transition">💡
+                            Explain concept</button>
+                    </div>
+                </div>
+            </template>
+
+            <input id="imageInput" type="file" accept="image/*" multiple class="hidden" />
+            <div id="imagePreview" class="px-6 py-2 hidden flex gap-2"></div>
+
+            <div class="p-6">
+                <div
+                    class="max-w-4xl mx-auto dark-glass rounded-3xl pt-2 pb-2 ps-2 flex items-end border border-white/10 shadow-2xl relative">
+                    <input id="imageInput" type="file" accept="image/*" class="hidden" />
+                    <button onclick="document.getElementById('imageInput').click()"
+                        class="ps-2 pt-4 pb-4 pe-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-2xl transition text-gray-500 dark:text-gray-400">📎</button>
+
+                    <div class="relative">
+                        <button onclick="toggleEmoji()"
+                            class="ps-2 pt-4 pb-4 pe-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-2xl transition text-gray-500 dark:text-gray-400">
+                            ☺
+                        </button>
+                        <div id="emojiPicker"
+                            class="hidden absolute bottom-full left-0 mb-4 grid grid-cols-8 gap-1 p-3 dark-glass rounded-2xl z-50 w-64 h-48 overflow-y-auto shadow-2xl">
+                        </div>
+                    </div>
+
+                    <textarea id="messageInput" rows="1"
+                        class="flex-1 bg-transparent p-4 outline-none text-sm resize-none max-h-32 text-inherit"
+                        placeholder="Ask Nebula anything..."></textarea>
+
+                    <button onclick="sendMessage()"
+                        class="me-2 mb-1 bg-primary hover:scale-105 active:scale-95 text-white dark:text-black w-12 h-12 rounded-2xl flex items-center justify-center transition shadow-lg shadow-primary/30 font-bold">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="apiModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] hidden">
+        <div class="glass-effect p-8 rounded-3xl w-full max-w-md border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-white text-2xl font-bold">API Settings</h2>
+                <button onclick="closeApiModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <p class="text-gray-400 text-sm mb-6">Enter your OpenRouter or OpenAI API key.</p>
+
+            <div class="relative group">
+                <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..."
+                    class="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all pr-14">
+
+                <button onclick="toggleApiVisibility()"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors text-xl">
+                    <span id="eyeIcon">👁️</span>
+                </button>
+            </div>
+
+            <button onclick="saveApiKey()"
+                class="w-full bg-primary hover:bg-primary/80 text-white font-bold py-4 rounded-xl mt-6 transition-all transform active:scale-95 shadow-lg shadow-primary/20">
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
