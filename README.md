@@ -25,7 +25,7 @@ NebulaChat is a high-performance, aesthetically pleasing AI chat interface desig
 |---|---|
 | ![Dark Mode](images/dark_mode.png) | ![Light Mode](images/light_mode.png) |
 
-| API Settings (Hidden) | API Settings (Visible) |
+| API Settings (Hidden) 
 |---|---|
 | ![API Hidden](images/api_hidden.png) 
 
@@ -44,4 +44,4 @@ NebulaChat is a high-performance, aesthetically pleasing AI chat interface desig
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/minuyuhansi/Nebula-ChatBot.git](https://github.com/minuyuhansi/Nebula-ChatBot.git)
+git clone [https://github.com/minuyuhansi/Nebula-ChatBot.git]
