@@ -26,7 +26,6 @@ NebulaChat is a high-performance, aesthetically pleasing AI chat interface desig
 | ![Dark Mode](images/dark_mode.png) | ![Light Mode](images/light_mode.png) |
 
 | API Settings (Hidden) 
-|---|---|
 | ![API Hidden](images/api_hidden.png) 
 
 ---
